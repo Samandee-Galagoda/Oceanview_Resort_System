@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * TDD GREEN tests for ReservationRequestDTO.
+ */
 public class ReservationRequestDtoTest {
 
     private ReservationRequestDTO dto;
@@ -16,7 +19,7 @@ public class ReservationRequestDtoTest {
     }
 
     /**
-     * TDD pass test 1: reservationNumber getter should return the value set by the setter.
+     * reservationNumber getter should return the value set by the setter.
      */
     @Test
     public void testReservationNumber_SetAndGet() {
@@ -29,7 +32,7 @@ public class ReservationRequestDtoTest {
     }
 
     /**
-     * TDD pass test 2: check-in and check-out date getters should return the values set by setters.
+     * check-in and check-out date getters should return the values set by setters.
      */
     @Test
     public void testCheckInAndCheckOutDates_SetAndGet() {

@@ -2,6 +2,7 @@ package com.oceanview.resort.controller;
 
 import com.oceanview.resort.dto.ReservationRequestDTO;
 import com.oceanview.resort.dto.ReservationResponseDTO;
+import com.oceanview.resort.mapper.ReservationDetailMapper;
 import com.oceanview.resort.mapper.ReservationMapper;
 import com.oceanview.resort.service.ReservationService;
 import com.oceanview.resort.util.DaoFactory;
@@ -23,8 +24,10 @@ public class ReservationServlet extends BaseServlet {
         reservationService = new ReservationService(
                 DaoFactory.getInstance().getReservationDao(),
                 DaoFactory.getInstance().getGuestDao(),
-                DaoFactory.getInstance().getRoomRateDao(),
-                new ReservationMapper()
+                DaoFactory.getInstance().getRoomTypeDao(),
+                new ReservationMapper(),
+                DaoFactory.getInstance().getReservationDetailDao(),
+                new ReservationDetailMapper()
         );
     }
 
@@ -34,6 +37,14 @@ public class ReservationServlet extends BaseServlet {
             return;
         }
         try {
+            String action = request.getParameter("action");
+            if ("cancel".equalsIgnoreCase(action)) {
+                String reservationNumber = request.getParameter("reservationNumber");
+                reservationService.cancelReservation(reservationNumber);
+                sendSuccess(response, "Reservation cancelled", null);
+                return;
+            }
+
             ReservationRequestDTO dto = new ReservationRequestDTO();
             dto.setReservationNumber(request.getParameter("reservationNumber"));
             dto.setGuestName(request.getParameter("guestName"));
@@ -57,7 +68,19 @@ public class ReservationServlet extends BaseServlet {
             return;
         }
         String reservationNumber = request.getParameter("reservationNumber");
+        String guestName = request.getParameter("guestName");
         try {
+            // search by guest name (available to any authenticated user)
+            if (guestName != null && !guestName.trim().isEmpty()) {
+                List<ReservationResponseDTO> reservations = reservationService.searchReservationsByGuestName(guestName);
+                List<Map<String, Object>> items = new ArrayList<>();
+                for (ReservationResponseDTO dto : reservations) {
+                    items.add(toMap(dto));
+                }
+                sendSuccess(response, "Reservations matching guest name", items);
+                return;
+            }
+
             if (reservationNumber == null || reservationNumber.trim().isEmpty()) {
                 // Listing all reservations is admin-only
                 if (!ensureAdmin(request, response)) {

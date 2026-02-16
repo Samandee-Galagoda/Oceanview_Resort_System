@@ -1,13 +1,17 @@
 package com.oceanview.resort.service;
 
-import com.oceanview.resort.dao.ReservationDao;
 import com.oceanview.resort.dao.GuestDao;
-import com.oceanview.resort.dao.RoomRateDao;
+import com.oceanview.resort.dao.ReservationDao;
+import com.oceanview.resort.dao.ReservationDetailDao;
+import com.oceanview.resort.dao.RoomTypeDao;
 import com.oceanview.resort.dto.ReservationRequestDTO;
 import com.oceanview.resort.dto.ReservationResponseDTO;
 import com.oceanview.resort.mapper.ReservationMapper;
 import com.oceanview.resort.model.Guest;
 import com.oceanview.resort.model.Reservation;
+import com.oceanview.resort.model.ReservationDetail;
+import com.oceanview.resort.model.RoomType;
+import com.oceanview.resort.mapper.ReservationDetailMapper;
 import com.oceanview.resort.util.ValidationUtil;
 
 import java.time.LocalDate;
@@ -23,14 +27,30 @@ public class ReservationService {
 
     private final ReservationDao reservationDao;
     private final GuestDao guestDao;
-    private final RoomRateDao roomRateDao;
+    private final RoomTypeDao roomTypeDao;
     private final ReservationMapper reservationMapper;
+    private final ReservationDetailDao reservationDetailDao;
+    private final ReservationDetailMapper reservationDetailMapper;
 
-    public ReservationService(ReservationDao reservationDao, GuestDao guestDao, RoomRateDao roomRateDao, ReservationMapper reservationMapper) {
+    public ReservationService(ReservationDao reservationDao,
+                              GuestDao guestDao,
+                              RoomTypeDao roomTypeDao,
+                              ReservationMapper reservationMapper) {
+        this(reservationDao, guestDao, roomTypeDao, reservationMapper, null, null);
+    }
+
+    public ReservationService(ReservationDao reservationDao,
+                              GuestDao guestDao,
+                              RoomTypeDao roomTypeDao,
+                              ReservationMapper reservationMapper,
+                              ReservationDetailDao reservationDetailDao,
+                              ReservationDetailMapper reservationDetailMapper) {
         this.reservationDao = reservationDao;
         this.guestDao = guestDao;
-        this.roomRateDao = roomRateDao;
+        this.roomTypeDao = roomTypeDao;
         this.reservationMapper = reservationMapper;
+        this.reservationDetailDao = reservationDetailDao;
+        this.reservationDetailMapper = reservationDetailMapper;
     }
 
     public ReservationResponseDTO addReservation(ReservationRequestDTO request) {
@@ -45,8 +65,12 @@ public class ReservationService {
             errors.add("Room type must be one of " + ROOM_TYPES);
         }
 
-        if (request.getRoomType() != null && roomRateDao.findRateByRoomType(request.getRoomType()) == null) {
-            errors.add("Selected room type is not configured in the system");
+        RoomType type = null;
+        if (request.getRoomType() != null) {
+            type = roomTypeDao.findByName(request.getRoomType());
+            if (type == null) {
+                errors.add("Selected room type is not configured in the system");
+            }
         }
 
         if (!ValidationUtil.isValidContact(request.getContactNumber())) {
@@ -58,6 +82,12 @@ public class ReservationService {
 
         if (checkIn != null && checkOut != null && !checkOut.isAfter(checkIn)) {
             errors.add("Check-out date must be after check-in date");
+        }
+
+        // Check availability for the chosen room type and dates
+        if (type != null && checkIn != null && checkOut != null &&
+                reservationDao.existsOverlappingReservation(type.getId(), checkIn, checkOut)) {
+            errors.add("Selected room type is not available for the chosen dates");
         }
 
         if (request.getReservationNumber() != null
@@ -84,6 +114,12 @@ public class ReservationService {
 
         reservation.setRoomTypeId(resolveRoomTypeId(reservation.getRoomType()));
         reservationDao.create(reservation);
+
+        // Optionally create a default ReservationDetail record
+        if (reservationDetailDao != null && reservationDetailMapper != null) {
+            ReservationDetail detail = reservationDetailMapper.createDefaultForReservation(reservation.getId());
+            reservationDetailDao.create(detail);
+        }
         return reservationMapper.toResponse(reservation);
     }
 
@@ -98,6 +134,16 @@ public class ReservationService {
         return reservationMapper.toResponse(reservation);
     }
 
+    public void cancelReservation(String reservationNumber) {
+        if (reservationNumber == null || reservationNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Reservation number is required");
+        }
+        boolean updated = reservationDao.cancelByReservationNumber(reservationNumber.trim());
+        if (!updated) {
+            throw new IllegalStateException("Reservation not found: " + reservationNumber);
+        }
+    }
+
     public List<ReservationResponseDTO> listReservations() {
         List<Reservation> reservations = reservationDao.findAll();
         List<ReservationResponseDTO> items = new ArrayList<>();
@@ -107,11 +153,23 @@ public class ReservationService {
         return items;
     }
 
+    public List<ReservationResponseDTO> searchReservationsByGuestName(String guestName) {
+        if (guestName == null || guestName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Guest name is required");
+        }
+        List<Reservation> reservations = reservationDao.findByGuestName(guestName.trim());
+        List<ReservationResponseDTO> items = new ArrayList<>();
+        for (Reservation r : reservations) {
+            items.add(reservationMapper.toResponse(r));
+        }
+        return items;
+    }
+
     private long resolveRoomTypeId(String roomTypeName) {
-        Long id = roomRateDao.findRoomTypeIdByRoomType(roomTypeName);
-        if (id == null) {
+        RoomType type = roomTypeDao.findByName(roomTypeName);
+        if (type == null) {
             throw new IllegalStateException("Room type not found: " + roomTypeName);
         }
-        return id;
+        return type.getId();
     }
 }

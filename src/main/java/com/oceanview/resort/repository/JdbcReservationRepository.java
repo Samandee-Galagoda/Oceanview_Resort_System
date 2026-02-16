@@ -14,6 +14,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class JdbcReservationRepository implements ReservationDao {
     private final DbConnectionManager dbManager = DbConnectionManager.getInstance();
@@ -157,6 +159,89 @@ public class JdbcReservationRepository implements ReservationDao {
             return rs.next() ? rs.getDouble("total") : 0.0;
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to calculate revenue", ex);
+        }
+    }
+
+    @Override
+    public Map<String, Integer> countRoomTypeReservationsCreatedBetween(LocalDate startInclusive, LocalDate endExclusive) {
+        String sql = "SELECT rt.type_name, COUNT(*) AS total " +
+                "FROM reservations r " +
+                "JOIN room_types rt ON r.room_type_id = rt.id " +
+                "WHERE r.status <> 'CANCELLED' " +
+                "AND r.created_at >= ? " +
+                "AND r.created_at < ? " +
+                "GROUP BY rt.type_name " +
+                "ORDER BY total DESC, rt.type_name ASC";
+        Map<String, Integer> result = new LinkedHashMap<>();
+        try (Connection connection = dbManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(startInclusive.atStartOfDay()));
+            stmt.setTimestamp(2, Timestamp.valueOf(endExclusive.atStartOfDay()));
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.put(rs.getString("type_name"), rs.getInt("total"));
+                }
+            }
+            return result;
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to count room type reservations for week", ex);
+        }
+    }
+
+    @Override
+    public List<Reservation> findByGuestName(String guestName) {
+        String sql = "SELECT r.id, r.reservation_number, r.check_in_date, r.check_out_date, r.created_at, r.status," +
+                " g.id AS guest_id, g.full_name, g.address, g.contact_number," +
+                " rt.id AS room_type_id, rt.type_name" +
+                " FROM reservations r" +
+                " JOIN guests g ON r.guest_id = g.id" +
+                " JOIN room_types rt ON r.room_type_id = rt.id" +
+                " WHERE LOWER(g.full_name) LIKE LOWER(?)" +
+                " ORDER BY r.created_at DESC";
+        List<Reservation> reservations = new ArrayList<>();
+        try (Connection connection = dbManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, "%" + guestName.trim() + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    reservations.add(mapRow(rs));
+                }
+            }
+            return reservations;
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to search reservations by guest name", ex);
+        }
+    }
+
+    @Override
+    public boolean cancelByReservationNumber(String reservationNumber) {
+        String sql = "UPDATE reservations SET status = 'CANCELLED' WHERE reservation_number = ?";
+        try (Connection connection = dbManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, reservationNumber);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to cancel reservation", ex);
+        }
+    }
+
+    @Override
+    public boolean existsOverlappingReservation(long roomTypeId, LocalDate checkIn, LocalDate checkOut) {
+        String sql = "SELECT 1 FROM reservations " +
+                "WHERE room_type_id = ? " +
+                "AND status <> 'CANCELLED' " +
+                "AND check_in_date < ? " +  // existing start < new checkout
+                "AND check_out_date > ?";   // existing end > new checkin
+        try (Connection connection = dbManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, roomTypeId);
+            stmt.setDate(2, Date.valueOf(checkOut));
+            stmt.setDate(3, Date.valueOf(checkIn));
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to check overlapping reservations", ex);
         }
     }
 
