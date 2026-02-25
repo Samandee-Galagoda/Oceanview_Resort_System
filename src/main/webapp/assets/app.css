@@ -1,0 +1,301 @@
+:root {
+    --navy: #0D1A63;
+    --blue: #1A2CA3;
+    --royal: #2845D6;
+    --accent: #F68048;
+    --bg: #f6f7fb;
+    --text: #1a1a1a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.topbar {
+    background: linear-gradient(120deg, var(--navy), var(--royal));
+    color: #fff;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.brand .title {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.brand .subtitle {
+    opacity: 0.9;
+    font-size: 12px;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    opacity: 0.95;
+}
+.link:hover { opacity: 1; text-decoration: underline; }
+
+.btn {
+    border: none;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.16);
+    color: #fff;
+    transition: 0.2s ease;
+}
+.btn:hover { background: rgba(255,255,255,0.22); }
+
+.container {
+    max-width: 1100px;
+    margin: 22px auto 48px;
+    padding: 0 16px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(13, 26, 99, 0.12);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.action-card {
+    display: block;
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(13, 26, 99, 0.12);
+    text-decoration: none;
+    color: var(--text);
+    border: 1px solid #e7e9fb;
+    transition: 0.15s ease;
+    min-height: 120px;
+}
+.action-card:hover {
+    transform: translateY(-2px);
+    border-color: #c9d0ff;
+    box-shadow: 0 14px 30px rgba(13, 26, 99, 0.16);
+}
+.action-card .label {
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0 0 6px 0;
+}
+.action-card .desc {
+    margin: 0;
+    font-size: 13px;
+    color: #4a4a4a;
+}
+.badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: var(--navy);
+    font-size: 12px;
+}
+.badge.accent { background: #ffe9e1; color: #7a2400; }
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+label {
+    font-size: 12px;
+    color: #3d3d3d;
+    display: block;
+    margin-bottom: 6px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #d9dbea;
+    font-size: 14px;
+    background: #fff;
+}
+
+.primary {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+.primary:hover { background: var(--royal); }
+.primary.accent { background: var(--accent); }
+.primary.accent:hover { background: #f56a2c; }
+
+.status {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    background: #eef2ff;
+    color: var(--navy);
+    border: 1px solid #d7ddff;
+}
+.status.error { background: #ffe9e1; color: #b21f2d; border-color: #ffd0bf; }
+
+.muted { color: #6b6b6b; font-size: 12px; }
+
+.footer {
+    text-align: center;
+    padding: 18px;
+    color: #6b6b6b;
+    font-size: 12px;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 26, 99, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+}
+.modal {
+    width: min(820px, 96vw);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(13, 26, 99, 0.28);
+    border: 1px solid #e7e9fb;
+    overflow: hidden;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background: linear-gradient(120deg, rgba(13,26,99,0.08), rgba(40,69,214,0.10));
+}
+.modal-title {
+    font-weight: 800;
+    color: var(--navy);
+}
+.modal-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid #d9dbea;
+    background: #fff;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--navy);
+}
+.modal-close:hover {
+    border-color: #bfc6f3;
+}
+.modal-body {
+    padding: 16px;
+}
+
+/* Ticket cards (reservations) */
+.ticket-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 14px;
+}
+.ticket {
+    position: relative;
+    padding: 16px;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid #e7e9fb;
+    box-shadow: 0 10px 24px rgba(13, 26, 99, 0.12);
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+.ticket:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(13, 26, 99, 0.16);
+    border-color: #c9d0ff;
+}
+.ticket:before, .ticket:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid #e7e9fb;
+    transform: translateY(-50%);
+}
+.ticket:before { left: -11px; }
+.ticket:after { right: -11px; }
+.ticket .top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: baseline;
+}
+.ticket .code {
+    font-weight: 800;
+    color: var(--navy);
+    font-size: 15px;
+}
+.ticket .tag {
+    font-size: 11px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: var(--navy);
+    white-space: nowrap;
+}
+.ticket .line {
+    margin-top: 10px;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, #d9dbea 0 10px, transparent 10px 18px);
+}
+.ticket .info {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #333;
+    display: grid;
+    gap: 6px;
+}
+.ticket .muted {
+    color: #6b6b6b;
+    font-size: 12px;
+}
