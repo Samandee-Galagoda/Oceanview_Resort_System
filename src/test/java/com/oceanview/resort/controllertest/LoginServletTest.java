@@ -170,4 +170,36 @@ class LoginServletTest {
             "FAILED: Invalid credentials should result in 'Invalid username or password' error. " +
             "If this fails, the credential validation logic (lines 31-38 in LoginServlet) may be removed.");
     }
+
+    @Test
+    void testLogin_ValidCredentials_ReturnsOK() throws IOException {
+        User validUser = new User();
+        validUser.setUsername("admin");
+        validUser.setRole("ADMIN");
+        validUser.setFullName("Admin");
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("admin123");
+        when(request.getParameter("mode")).thenReturn(null);
+        when(request.getContextPath()).thenReturn("/app");
+        injectAuthService();
+        when(authService.login("admin", "admin123")).thenReturn(validUser);
+
+        loginServlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @Test
+    void testLogin_InvalidCredentials_ReturnsUnauthorized() throws IOException {
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("wrong");
+        when(request.getParameter("mode")).thenReturn(null);
+        when(request.getContextPath()).thenReturn("/app");
+        injectAuthService();
+        when(authService.login("admin", "wrong")).thenReturn(null);
+
+        loginServlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    }
 }
