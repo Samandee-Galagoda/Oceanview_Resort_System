@@ -37,12 +37,18 @@ public class LoginServlet extends BaseServlet {
                 }
                 return;
             }
+            // set login session state
             request.getSession(true).setAttribute("user", user.getUsername());
             request.getSession(true).setAttribute("role", user.getRole());
             Map<String, Object> data = new HashMap<>();
             data.put("username", user.getUsername());
             data.put("role", user.getRole());
             if (htmlMode) {
+                // flash success message for next page render
+                request.getSession(true).setAttribute(
+                        "flashMessage",
+                        "Successfully logged in as " + user.getFullName() + " (" + user.getRole() + ")"
+                );
                 if ("ADMIN".equalsIgnoreCase(user.getRole())) {
                     response.sendRedirect(request.getContextPath() + "/admin-menu.jsp");
                 } else {
