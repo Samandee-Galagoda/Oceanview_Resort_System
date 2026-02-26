@@ -66,6 +66,13 @@
 
         <div class="row" style="margin-top:12px;">
             <div>
+                <label>Guest Email</label>
+                <input id="guestEmail" type="email" placeholder="guest@example.com">
+            </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+            <div>
                 <label>Check-in Date</label>
                 <input id="checkInDate" type="date">
             </div>
@@ -102,19 +109,28 @@
             guestName: document.getElementById('guestName').value.trim(),
             address: document.getElementById('address').value.trim(),
             contactNumber: document.getElementById('contactNumber').value.trim(),
+            guestEmail: document.getElementById('guestEmail').value.trim(),
             roomType: document.getElementById('roomType').value,
             checkInDate: document.getElementById('checkInDate').value,
             checkOutDate: document.getElementById('checkOutDate').value
         };
 
-        if (!payload.reservationNumber || !payload.guestName || !payload.address || !payload.contactNumber || !payload.checkInDate || !payload.checkOutDate) {
+        if (!payload.reservationNumber || !payload.guestName || !payload.address || !payload.contactNumber || !payload.guestEmail || !payload.checkInDate || !payload.checkOutDate) {
             showStatus('Please fill in all required fields.', false);
+            return;
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(payload.guestEmail)) {
+            showStatus('Please enter a valid guest email address.', false);
             return;
         }
 
         const { data } = await Oceanview.formPost('/api/reservations', payload);
         if (data && data.success) {
-            showStatus(`Reservation saved: ${data.data.reservationNumber} for ${data.data.guestName}.`, true);
+            const message = `Reservation saved: ${data.data.reservationNumber} for ${data.data.guestName}. Email with reservation details has been sent to ${payload.guestEmail}.`;
+            showStatus(message, true);
+            alert(`Reservation details have been sent to ${payload.guestEmail}.`);
         } else {
             showStatus((data && data.message) ? data.message : 'Failed to save reservation.', false);
         }
