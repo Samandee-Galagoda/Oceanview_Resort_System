@@ -1,7 +1,96 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+  <display-name>Oceanview Resort System</display-name>
 
-<web-app>
-  <display-name>Archetype Created Web Application</display-name>
+  <listener>
+    <listener-class>com.oceanview.resort.config.AppContextListener</listener-class>
+  </listener>
+
+  <servlet>
+    <servlet-name>LoginServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.LoginServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LoginServlet</servlet-name>
+    <url-pattern>/api/login</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>LogoutServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.LogoutServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LogoutServlet</servlet-name>
+    <url-pattern>/api/logout</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>ReservationServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.ReservationServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ReservationServlet</servlet-name>
+    <url-pattern>/api/reservations</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>BillingServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.BillingServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BillingServlet</servlet-name>
+    <url-pattern>/api/bill</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>ReportServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.ReportServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ReportServlet</servlet-name>
+    <url-pattern>/api/reports</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>HelpServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.HelpServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>HelpServlet</servlet-name>
+    <url-pattern>/api/help</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>HealthServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.HealthServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>HealthServlet</servlet-name>
+    <url-pattern>/api/health</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>UserManagementServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.UserManagementServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UserManagementServlet</servlet-name>
+    <url-pattern>/api/users</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>RoomTypeManagementServlet</servlet-name>
+    <servlet-class>com.oceanview.resort.controller.RoomTypeManagementServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RoomTypeManagementServlet</servlet-name>
+    <url-pattern>/api/room-types</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
 </web-app>
